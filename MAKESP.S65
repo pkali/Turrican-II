@@ -1,0 +1,110 @@
+WNPTR    =   ADW     зеро
+MAKESP
+          DPOKE  ADR1,WZORY1.3
+          DPOKE  WZPTR,WZORY0
+          DPOKE  WNPTR,WNN
+         LDY #0
+PTL3     STY IL
+         LDA SZEROKOSC,Y
+         STA XLP
+         STA LX
+         LDA WYSOKOSC,Y
+         STA YLP
+         LDA #0
+         STA DODAJ
+         LDX #8
+CYKL     LSR LX
+         BCC NIED
+         CLC 
+         ADC YLP
+NIED     ROR A
+         ROR DODAJ
+         DEX 
+         BNE CYKL
+         STA DODAJ+1
+         LDA WNPTR
+         STA WNLTB,Y
+         LDA WNPTR+1
+         STA WNHTB,Y
+         LDY #0
+         LDA WZPTR
+         STA WPT
+         STA (WNPTR),Y
+         INY 
+         LDA WZPTR+1
+         STA WPT+1
+         STA (WNPTR),Y
+          ADD.Q  WNPTR,2
+         LDA #3
+         STA I
+LDD0.5
+         LDY #0
+         LDA ADR1
+         STA (WNPTR),Y
+         INY 
+         LDA ADR1+1
+         STA (WNPTR),Y
+          ADD.Q  WNPTR,2
+         LDX #2
+LDD0.75
+         LDY #0
+LDD1
+          MOVE.C  ADR1,ADR
+          MOVE.C  WPT,AD2
+         LDA XLP
+         STA IX
+         CLC 
+LDD0
+         LDA (AD2),Y
+         ROR A
+         STA (ADR),Y
+         PHP 
+         CLC 
+         LDA ADR
+         ADC YLP
+         STA ADR
+         BCC DD1
+         INC ADR+1
+DD1
+         CLC 
+         LDA AD2
+         ADC YLP
+         STA AD2
+         BCC DD1.5
+         INC AD2+1
+DD1.5
+         DEC IX
+         BEQ KN1
+         PLP 
+         JMP LDD0
+KN1      PLP 
+         INY 
+         CPY YLP
+         BNE LDD1
+         DEX 
+         BEQ DD4
+          MOVE.C  ADR1,WPT
+DD3
+         JMP LDD0.75
+DD4
+         ;           MOVE.C  ADR1,WPT
+          ADD.W  DODAJ,ADR1
+KN2
+         DEC I
+         BEQ NLDD
+         JMP LDD0.5
+NLDD
+          ADD.W  DODAJ,WZPTR
+         LDY IL
+         INY 
+         CPY #ILESP2
+         BCS RTS1
+         JMP PTL3
+RTS1     RTS 
+ADR1     .WORD 0
+WZPTR    .WORD 0
+WPT      .WORD 0
+LX       .BYTE 0
+DODAJ    .WORD 0
+I        .BYTE 0
+

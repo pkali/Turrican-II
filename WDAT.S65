@@ -1,0 +1,241 @@
+LOADSEC
+;LADUJE DPEEK(AD2) BAJTOW W PAMIEC OD ADRESY DPEEK(ADR),OD SEKTORA DPEEK($30A)
+         LDA #$31
+         STA $0300
+         LDA #$52
+         STA $0302
+         LDA # >BUF
+         STA $0305
+         LDA # <BUF
+         STA $0304
+AGAIN
+         LDA #$FF
+         STA $D301
+         STA $D40E
+         STA $D20E
+         LDA #$40
+         STA $0303
+         JSR $E459
+         BMI AGAIN
+         LDY #0
+         STY $D40E
+         STY $D20E
+         DEC $D301
+         INC $030A
+         BNE L.03
+         INC $030B
+L.03
+         LDY #0
+L.A
+         LDA AD2
+         ORA AD2+1
+         BNE L.02
+         RTS 
+L.02
+         LDA BUF,Y
+         STA (ADR),Y
+         DEC AD2
+         LDA AD2
+         CMP #$FF
+         BNE L.01
+         DEC AD2+1
+L.01
+         INY 
+         BPL L.A
+; INC $030A
+; BNE L.03
+; INC $030B
+;L.03
+         LDA ADR
+         EOR #$80
+         STA ADR
+         BMI AGAIN
+         INC ADR+1
+         JMP AGAIN
+TABL
+         .BYTE  <E0, <E0+42*8, <E0+42*8*2
+         .BYTE  <E1, <E1+42*8, <E1+42*8*2
+         .BYTE  <E2, <E2+42*8, <E2+42*8*2
+         .BYTE  <E3, <E3+42*8, <E3+42*8*2
+         .BYTE  <E4, <E4+42*8, <E4+42*8*2
+         .BYTE  <E5, <E5+42*8, <E5+42*8*2
+         .BYTE  <E6, <E6+42*8, <E6+42*8*2
+         .BYTE  <E7, <E7+42*8, <E7+42*8*2
+         .BYTE  <E0, <E0+42*8, <E0+42*8*2
+         .BYTE  <E1, <E1+42*8, <E1+42*8*2
+         .BYTE  <E2, <E2+42*8, <E2+42*8*2
+         .BYTE  <E3, <E3+42*8, <E3+42*8*2
+         .BYTE  <E4, <E4+42*8, <E4+42*8*2
+         .BYTE  <E5, <E5+42*8, <E5+42*8*2
+         .BYTE  <E6, <E6+42*8, <E6+42*8*2
+         .BYTE  <E7, <E7+42*8, <E7+42*8*2
+TABH
+         .BYTE  >E0, >E0+42*8, >E0+42*8*2
+         .BYTE  >E1, >E1+42*8, >E1+42*8*2
+         .BYTE  >E2, >E2+42*8, >E2+42*8*2
+         .BYTE  >E3, >E3+42*8, >E3+42*8*2
+         .BYTE  >E4, >E4+42*8, >E4+42*8*2
+         .BYTE  >E5, >E5+42*8, >E5+42*8*2
+         .BYTE  >E6, >E6+42*8, >E6+42*8*2
+         .BYTE  >E7, >E7+42*8, >E7+42*8*2
+         .BYTE  >E0, >E0+42*8, >E0+42*8*2
+         .BYTE  >E1, >E1+42*8, >E1+42*8*2
+         .BYTE  >E2, >E2+42*8, >E2+42*8*2
+         .BYTE  >E3, >E3+42*8, >E3+42*8*2
+         .BYTE  >E4, >E4+42*8, >E4+42*8*2
+         .BYTE  >E5, >E5+42*8, >E5+42*8*2
+         .BYTE  >E6, >E6+42*8, >E6+42*8*2
+         .BYTE  >E7, >E7+42*8, >E7+42*8*2
+TAB2L
+         .BYTE  <E2.0, <E2.0+42*8, <E2.0+42*8*2
+         .BYTE  <E2.1, <E2.1+42*8, <E2.1+42*8*2
+         .BYTE  <E2.2, <E2.2+42*8, <E2.2+42*8*2
+         .BYTE  <E2.3, <E2.3+42*8, <E2.3+42*8*2
+         .BYTE  <E2.4, <E2.4+42*8, <E2.4+42*8*2
+         .BYTE  <E2.5, <E2.5+42*8, <E2.5+42*8*2
+         .BYTE  <E2.6, <E2.6+42*8, <E2.6+42*8*2
+         .BYTE  <E2.7, <E2.7+42*8, <E2.7+42*8*2
+         .BYTE  <E2.0, <E2.0+42*8, <E2.0+42*8*2
+         .BYTE  <E2.1, <E2.1+42*8, <E2.1+42*8*2
+         .BYTE  <E2.2, <E2.2+42*8, <E2.2+42*8*2
+         .BYTE  <E2.3, <E2.3+42*8, <E2.3+42*8*2
+         .BYTE  <E2.4, <E2.4+42*8, <E2.4+42*8*2
+         .BYTE  <E2.5, <E2.5+42*8, <E2.5+42*8*2
+         .BYTE  <E2.6, <E2.6+42*8, <E2.6+42*8*2
+         .BYTE  <E2.7, <E2.7+42*8, <E2.7+42*8*2
+TAB2H
+         .BYTE  >E2.0, >E2.0+42*8, >E2.0+42*8*2
+         .BYTE  >E2.1, >E2.1+42*8, >E2.1+42*8*2
+         .BYTE  >E2.2, >E2.2+42*8, >E2.2+42*8*2
+         .BYTE  >E2.3, >E2.3+42*8, >E2.3+42*8*2
+         .BYTE  >E2.4, >E2.4+42*8, >E2.4+42*8*2
+         .BYTE  >E2.5, >E2.5+42*8, >E2.5+42*8*2
+         .BYTE  >E2.6, >E2.6+42*8, >E2.6+42*8*2
+         .BYTE  >E2.7, >E2.7+42*8, >E2.7+42*8*2
+         .BYTE  >E2.0, >E2.0+42*8, >E2.0+42*8*2
+         .BYTE  >E2.1, >E2.1+42*8, >E2.1+42*8*2
+         .BYTE  >E2.2, >E2.2+42*8, >E2.2+42*8*2
+         .BYTE  >E2.3, >E2.3+42*8, >E2.3+42*8*2
+         .BYTE  >E2.4, >E2.4+42*8, >E2.4+42*8*2
+         .BYTE  >E2.5, >E2.5+42*8, >E2.5+42*8*2
+         .BYTE  >E2.6, >E2.6+42*8, >E2.6+42*8*2
+         .BYTE  >E2.7, >E2.7+42*8, >E2.7+42*8*2
+STAREL   .BYTE  <STARY0, <STARY1, <STARY2
+STAREH   .BYTE  >STARY0, >STARY1, >STARY2
+STARSL   .BYTE  <STAR0, <STAR1, <STAR2
+STARSH   .BYTE  >STAR0, >STAR1, >STAR2
+WNADRSL  *=  *+ILESP
+WNADRSH  *=  *+ILESP
+WNN      *=  *+ILESP2*8
+         ;           .INCLUDE #D8:WZORY3.MAC
+WNLTB    *=  *+ILESP2 ;.BYTE <WN
+WNHTB    *=  *+ILESP2 ;.BYTE >WN
+SETSTH
+;AK-NUMER  Y-W KTOREGO SPRITA
+         TAX 
+         LDA SZEROKOSC,X
+         STA XL,Y
+         LDA WYSOKOSC,X
+         STA YL,Y
+         LDA WNLTB,X
+         STA WNADRSL,Y
+         LDA WNHTB,X
+         STA WNADRSH,Y
+         RTS 
+         .MACRO SET 
+         LDA #%1
+         LDY #%2
+         JSR SETSTH
+         .ENDM 
+         .MACRO XY   ; X,Y,NRSPRITA
+         LDA #%1
+         STA X+%3
+         LDA #%2
+         STA Y+%3
+         .ENDM 
+STP      =   0
+IP0      =   39
+IP1      =   39*2
+IP2      =   39*3
+IP3      =   39*4
+IP4      =   39*5
+IP5      =   39*6
+IP6      =   39*7
+SKP      =   39*8
+SCHP     =   39*9
+STL      =   39*10
+IL0      =   39*11
+IL1      =   39*12
+IL2      =   39*13
+IL3      =   39*14
+IL4      =   39*15
+IL5      =   39*16
+IL6      =   39*17
+SKL      =   39*18
+SCHL     =   39*19
+DATSP0            .INCBIN #DATSP0.BIN
+DATSP1            .INCBIN #DATSP1.BIN
+DATMSS            .INCBIN #DATMSS.BIN
+BALL
+         .BYTE $3C,$7E,$7E,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$7E,$7E,$3C
+BIGBL    .BYTE $03,$0F,$1F,$1F,$3F,$3F,$7F,$7F,$7F
+         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+         .BYTE $7F,$7F,$7F,$3F,$3F,$1F,$1F,$0F,$03
+BIGBP    .BYTE $C0,$F0,$F8,$F8,$FC,$FC,$FE,$FE,$FE
+         .BYTE $FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF,$FF
+         .BYTE $FE,$FE,$FE,$FC,$FC,$F8,$F8,$F0,$C0
+BAR
+         .BYTE $24,$24,$3C,$3C,$24,$24
+         .BYTE $24,$24,$3C,$3C,$24,$24
+         .BYTE $24,$24,$3C,$3C,$24,$24
+         .BYTE $24,$24,$3C,$3C,$24,$24
+         .BYTE $24,$24,$3C,$3C,$24,$24
+         .BYTE $24,$24,$3C,$3C,$24,$24
+NABOJL
+         .BYTE $07,$3F,$FF,$FF,$3F,$07
+NABOJP
+         .BYTE $E0,$FC,$FF,$FF,$FC,$E0
+CHANFLG  .BYTE 0
+SZEROKOSC
+         .BYTE 4,4,4,4,4,4,4,4
+WYSOKOSC
+         .BYTE 20,20,20,21,20,20,20,20
+XL       *=  *+ILESP
+OLDXL    *=  *+ILESP
+YL       *=  *+ILESP
+OLDYL    *=  *+ILESP
+;XSCH .BYTE 0
+XP40     *=  *+ILESP
+XP41     *=  *+ILESP
+YADC     *=  *+ILESP
+POCZY    *=  *+ILESP
+OLDPOCZY *=  *+ILESP
+OLDYADC  *=  *+ILESP
+SPENABLE *=  *+ILESP
+ONOFF    *=  *+ILESP
+X        *=  *+ILESP
+Y        *=  *+ILESP
+PLF0S    .BYTE 0
+PLF1S    .BYTE 0
+PLF2S    .BYTE 0
+PLF3S    .BYTE 0
+BACKS    .BYTE 0
+X2       .BYTE 0
+X3       .BYTE 0
+X4       .BYTE 0
+IX       .BYTE 0
+XADC2    .WORD 0
+YADCP    .BYTE 0
+YADC2    .BYTE 0
+HSC      .BYTE 0
+VSC      .BYTE 0
+TSCH     *=  *+42
+KORX     .BYTE 0
+KORY     .BYTE 0
+WAITP    .BYTE 0
+TIM      .BYTE 0
+XSCH     .BYTE 0
+POCZYP   .BYTE 0
+OLDPOCZYP .BYTE 0
+RTFLG    .BYTE 0
+

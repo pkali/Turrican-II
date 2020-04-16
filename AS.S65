@@ -1,0 +1,254 @@
+         .MACRO ADB 
+         SED 
+         CLC 
+         LDA %1
+         ADC #%2
+         STA %1
+         CLD 
+         .ENDM 
+         .MACRO SBB 
+         SED 
+         SEC 
+         LDA %1
+         SBC #%2
+         STA %1
+         CLD 
+         .ENDM 
+         .MACRO ADD 
+         CLC 
+         LDA %1
+         ;           .IF %2<256
+         ;           ADC #%2
+         ;           .ELSE
+         ADC %2
+         ;           .ENDIF
+         STA %1
+         .ENDM 
+;-------------------
+         .MACRO DOSTAL? 
+;X,Y,ILE+WLEWO,ILE+WDOL,GDZIE BNE IF PUDLO
+         CLC 
+         LDA STRZELIL?
+         BEQ ?BC
+         LDA XR
+         CMP %1
+         BCC ?BC     ;PUDLO
+         SEC 
+         SBC #%3
+         CMP %1
+         BCS %5      ;PUDLO
+         LDA YR
+         CMP %2
+?BC      BCC %5      ;PUDLO
+         SEC 
+         SBC #%4
+         CMP %2
+         BCS %5      ;PUDLO
+         .ENDM 
+XR       .BYTE 0
+YR       .BYTE 0
+         .MACRO ACJOY 
+         ;           CO INC,LICZNIK,LICZN. DO SKAS,1-INC 0-DEC,JEZELI JEST TO Y
+         INC %2
+         LDA %2
+         CMP #8      ;  20
+         BCC ?LDA0
+         .IF %4=0
+           DEC %1
+           .IF %0=5
+             DEC %1
+             .ENDIF 
+           .ELSE 
+           INC %1
+           .IF %0=5
+             INC %1
+             .ENDIF 
+           .ENDIF 
+         CMP #20     ; 30
+         BCC ?LDA0
+         .IF %4=0
+           DEC %1
+           DEC %1
+           .IF %0=5
+             DEC %1
+             DEC %1
+             .ENDIF 
+           .ELSE 
+           INC %1
+           INC %1
+           .IF %0=5
+             INC %1
+             INC %1
+             .ENDIF 
+           .ENDIF 
+?LDA0
+         LDA #0
+         STA %3
+         .ENDM 
+B.DOSTAL? ;          A-X,Y-Y
+         STA B.SCH
+         LDA MASAKRA
+         BNE MORDUJ
+         LDA B.STRZELIL?
+         BEQ B.ND
+         LDA B.SCH
+         CMP BX1
+         BCC B.ND
+         CMP BX2
+         BCS B.ND
+         CPY BY1
+         BCC B.ND
+         CPY BY2
+         BCS B.ND
+MORDUJ   LDA #0
+         RTS 
+B.ND     LDA #1      ;NIE DOSTAL
+         RTS 
+B.STRZELIL? .BYTE 0
+B.SCH    .BYTE 0
+MASAKRA  .BYTE 0
+BX1      .BYTE 0
+BX2      .BYTE 0
+BY1      .BYTE 0
+BY2      .BYTE 0
+CHECKFUL
+         CLC 
+         ADC FULSCR
+         BMI RT.C
+         STA FULSCR
+RT.C     RTS 
+FULSCR   .BYTE 0
+JOYCTL
+         LDA H.MOV
+         BNE NSTH
+HST      JSR HSTOP
+         JMP CHV
+NSTH
+         BMI NPR
+         CMP #5
+         BCC MN5
+         LDA #4
+MN5
+         STA HSB+1
+;ÊÏÙ × ÐÒÁ×Ï
+         CLC 
+         LDA AXT
+         ADC #$0A
+         CMP TBSZER
+         BCS HST
+         JSR WLEWO
+         JSR SCROLLEFT
+         JMP CHV
+NPR
+         CLC 
+         EOR #$FF
+         ADC #1
+         CMP #5
+         BCC MN.5
+         LDA #4
+MN.5
+         STA HAD+1
+         LDA AXT
+         BNE WP0
+         LDA SMALLH
+         BEQ HST
+WP0      JSR WPRAWO
+         JSR SCROLRIGHT
+CHV
+         LDA V.MOV
+         BNE NSTV
+VST      JSR VSTOP
+         JMP CHEND
+NSTV
+         BMI NDN
+;ÊÏÙ × ÄÏÌ
+         CMP #$09
+         BCC MN9
+         LDA #8
+MN9
+         STA VAD+1
+         ;           JSR WGORE
+         ;           JSR SCROLUP
+         CLC 
+         LDA YTB
+         ADC #$06
+         CMP TBWYS
+         BCS VST
+         JSR WGORE
+         ;           JSR SCROLUP
+         JMP CHEND
+NDN
+         ;           LDA V.MOV
+         ;           BEQ VST
+         EOR #$FF
+         CLC 
+         ADC #1
+         CMP #9
+         BCC MN.9
+         LDA #8
+MN.9
+         STA VSB+1
+         LDA YTB
+         CMP #$FF
+         BEQ VST
+         JSR WDOL
+         ;           JSR SCROLDOWN
+CHEND    RTS 
+;
+ANIMOTION
+         LDA WAITP
+         BEQ ANIM
+         LDA TIM2
+         BEQ RTA
+         DEC WAITP
+RTA      RTS 
+ANIM
+         LDA XR
+         TAX 
+         SEC 
+         SBC #30
+         BCS B.OK
+         LDA #0
+B.OK
+         STA BX1
+         TXA 
+         CLC 
+         ADC #20
+         STA BX2
+         LDA YR
+         TAY 
+         SEC 
+         SBC #40
+         BCS B.OK1
+         LDA #0
+B.OK1
+         STA BY1
+         TYA 
+         CLC 
+         ADC #35
+         STA BY2
+;POCZATEK ANIMACJI
+;-----------------
+         LDA SPENABLE+0
+         BNE NPTT
+          XY  $18,$09,0
+          XY  100,100,1
+          XY  120,40,2
+         ;           XY  40,104,3
+          SET  1,0
+          SET  5,1
+          SET  7,2
+         ;           SET  10,3
+         LDA #1
+         STA SPENABLE+0
+         STA ONOFF+0
+         STA SPENABLE+1
+         STA ONOFF+1
+         STA SPENABLE+2
+         STA ONOFF+2
+         ;           STA SPENABLE+3
+         ;           STA ONOFF+3
+NPTT
+;-----------------
+         RTS 
+

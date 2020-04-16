@@ -1,0 +1,19 @@
+         .OPT NO LIST
+         .INCLUDE #SHORTsys.s65
+         .INCLUDE #LABELS.s65
+         *=  $4400
+         .INCLUDE #MAKESP.s65
+         .INCLUDE #WDAT.s65
+WZORY0
+         .INCLUDE #WZORY.s65
+WZORY0END
+WZORY1.3 *=  *+[WZORY0END-WZORY0]*3
+         .INCLUDE #STARES.s65
+RUN
+         .INCLUDE #W3.s65
+         .INCLUDE #AH.s65
+         .INCLUDE #AS.s65
+A0       .OPT LIST
+         *=  $02E0
+         .WORD RUN
+

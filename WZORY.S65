@@ -1,0 +1,10 @@
+;Wzory soft spritow do Turicana II
+W0            .INCBIN #ROBOP0.BIN
+W1            .INCBIN #ROBOP1.BIN
+W2            .INCBIN #ROBOP2.BIN
+W3            .INCBIN #ROBOP3.BIN
+W4            .INCBIN #ROBOL0.BIN
+W5            .INCBIN #ROBOL1.BIN
+W6            .INCBIN #ROBOL2.BIN
+W7            .INCBIN #ROBOL3.BIN
+

@@ -1,0 +1,81 @@
+JXITVBV  =   $E462
+ILESP    =   3
+ILESP2   =   8
+IRQENS=  $10     ° TEJ KOMORCE LEPIEJ DAC SPOKOJ
+         *=  $C0
+EPCS     *=  *+1     °
+LDLI     *=  *+1     °
+HSCROLS  *=  *+1     °
+VSCROLS  *=  *+1     °
+HADR     *=  *+2     °
+ADW      *=  *+1     °
+ADW2     *=  *+1     °
+PHA      *=  *+1     °
+PHX      *=  *+1     °
+IY       *=  *+1     °
+TIM2     *=  *+1     °
+KIERUNEK *=  *+1     °
+XLP      *=  *+1     °
+YLP      *=  *+1     °
+IL       *=  *+1     °
+ADR      *=  *+2     °
+AD2      *=  *+2     °
+ZEGAR    *=  *+1     °
+FRAME    *=  *+1     °
+SMALLH   *=  *+1     °
+SMALLV   *=  *+1     °
+SMALL2   *=  *+1     °
+LICZ     *=  *+1     °
+M.ADR    *=  *+2     °
+M.AD2    *=  *+2     °
+XHS      *=  *+1     °
+YHS      *=  *+1     °
+BUF      =   $0400
+E        =   $0400
+E0       =   E
+E1       =   E0+$0400
+E2       =   E1+$0400
+E3       =   E2+$0400
+E4       =   E3+$0400
+E5       =   E4+$0400
+E6       =   E5+$0400
+E7       =   E6+$0400
+EK2      =   $2400
+E2.0     =   EK2
+E2.1     =   E2.0+$0400
+E2.2     =   E2.1+$0400
+E2.3     =   E2.2+$0400
+E2.4     =   E2.3+$0400
+E2.5     =   E2.4+$0400
+E2.6     =   E2.5+$0400
+E2.7     =   E2.6+$0400
+EP0      =   EP+1
+EP1      =   EP+42+1
+EP2      =   EP+2*42+1
+PMB      =   $B800
+;SIZEP0 = $D008
+SIZEP1   =   $D008
+SIZEP2   =   $D00A
+SIZEP3   =   $D00B
+SIZEM    =   $D00C
+COLPM0   =   $D012
+;AUDF1 = $D200
+AUDC1    =   $D201
+AUDF2    =   $D202
+AUDC2    =   $D203
+AUDF3    =   $D204
+AUDC3    =   $D205
+AUDF4    =   $D206
+AUDC4    =   $D207
+AUDCTL   =   $D208
+SKCTL    =   $D20F
+         .MACRO SBB.W 
+         SEC 
+         LDA %1
+         SBC %2
+         STA %3
+         LDA %1+1
+         SBC %2+1
+         STA %3+1
+         .ENDM 
+

@@ -1,0 +1,64 @@
+         .OPT NO LIST
+         *=  $2400
+         .INCLUDE #SHORTSYS.s65
+         .INCLUDE #IO.s65
+T1        CLOSE  1
+          BPUT  0,MES1,MES2-MES1,0
+         JSR CLRBUF
+          INPUT  0,BUF,20,0
+          OPEN  1,4,0,BUF,0
+         BMI E1
+          BGET  1,$3000-6,$1006,0
+         BPL MV1
+E1       JSR SHIT
+         JMP T1
+MV1
+          RAMON  
+          MOVE.L  $3000,$C000,$1000
+          RAMOFF  
+T2        CLOSE  1
+          BPUT  0,MES2,MES3-MES2,0
+         JSR CLRBUF
+          INPUT  0,BUF,20,0
+          OPEN  1,4,0,BUF,0
+         BMI E2
+          BGET  1,$3000-6,$0806,0
+         BPL MV2
+E2       JSR SHIT
+         JMP T2
+MV2
+          RAMON  
+          MOVE.L  $3000,$D800,$0800
+          RAMOFF  
+T3        CLOSE  1
+          BPUT  0,MES3,ERROR-MES3,0
+         JSR CLRBUF
+          INPUT  0,BUF,20,0
+          OPEN  1,4,0,BUF,0
+         BMI E3
+          BGET  1,$3000,$2000,0
+         BPL MV3
+E3       JSR SHIT
+         JMP T3
+T4        CLOSE  1
+MV3
+          RAMON  
+          MOVE.L  $3000,$E000,$1FF0
+          RAMOFF  
+         RTS 
+MES1     .BYTE "KWADRATY>"
+MES2     .BYTE "FONTY>"
+MES3     .BYTE "TABELKA>"
+ERROR    .BYTE "SHIT,FELER!!!",$9B
+BUF      .BYTE "                                        "
+SHIT
+          PRINT  0,ERROR,50,0
+         RTS 
+CLRBUF
+         LDX #SHIT-BUF-1
+         LDA #0
+SS       STA BUF,X
+         DEX 
+         BPL SS
+         RTS 
+

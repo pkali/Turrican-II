@@ -1,0 +1,1380 @@
+;----------
+KWADRATY =   $C000   ;$E000
+FONTGEN  =   $D800   ;$D800
+TABADRKW =   $E000   ; $E580
+;----------
+BEGIN
+         JSR MAKESP
+GAMEOVER
+         JSR SETPRW
+         ;           JSR SETTRANS
+RESTART
+         JSR SETPRW
+         ;           JSR SETTRANS
+         ;           JSR MAKETBL
+         LDX #$7F
+PPT0     TXA 
+         STA EP,X
+         DEX 
+         BPL PPT0
+         ;           SET FONTTB
+         LDX #23
+         LDA #7*4
+FPT0     STA FONTTB,X
+         DEX 
+         STA FONTTB,X
+         DEX 
+         STA FONTTB,X
+         SEC 
+         SBC #$04
+         DEX 
+         BPL FPT0
+         JSR ECLR
+         ;           JSR SETCELOWNIK
+         LDA #$8F
+         STA WAITP   ;WAIT AZ WKRECI
+         LDA #$C6    ;$84
+         STA PLF0S
+         LDA #$7B    ;$00
+         STA PLF1S
+         LDA #$00    ;$7B
+         STA PLF2S
+         LDA #$82    ;$C6
+         STA BACKS
+         LDA #$21+4+8+16
+         STA DMACONS+1
+         LDA # <DL
+         STA DLIPTRSL+1
+         LDA # >DL
+         STA DLIPTRSH+1
+         LDA #0
+         LDX #ILESP-1
+DELPT    STA SPENABLE,X
+         STA ONOFF,X
+         DEX 
+         BPL DELPT
+;Kasowanie obszaru PM
+         INX 
+PMPT
+         STA PMB+$0300,X
+         STA PMB+$0400,X
+         STA PMB+$0500,X
+         STA PMB+$0600,X
+         STA PMB+$0700,X
+         DEX 
+         BNE PMPT
+;Inicjalizacja PM
+         LDX #4
+SIZ0     STA SIZEP0,X
+         DEX 
+         BPL SIZ0
+         LDA #5
+         STA COLPM0
+         STA COLPM0+2
+         LDA #8
+         STA COLPM0+1
+         STA COLPM0+3
+          POKE  PMBASE, >PMB
+          POKE  PMCTL,3
+          POKE  GTIACTL,$21
+;Ustawianie show ek2 ,make ek1
+;mozna nie dawac gdy w pierwszym
+;cyklu nie jest ustawiany jakis
+;sprite.
+         LDA # <TABL
+         STA TB+1
+         STA TB2+1
+         LDA # <TABH
+         STA TB1+1
+         STA TB3+1
+         LDA # >TABL
+         STA TB+2
+         STA TB2+2
+         LDA # >TABH
+         STA TB1+2
+         STA TB3+2
+         LDA # >EK2
+         STA EPCS
+;----------------------------
+          MOVE.C  TBSZER,ADR
+         ASL ADR
+         ROL ADR+1
+         ASL ADR
+         ROL ADR+1
+         LDX #0
+MN6      CLC 
+         LDA ADR
+         ADC TBSZER
+         STA ADR
+         STA ILENIZL+1,X
+         LDA ADR+1
+         ADC TBSZER+1
+         STA ADR+1
+         STA ILENIZH+1,X
+         INX 
+         CPX #2
+         BCC MN6
+         LDA #1
+         STA CHANFLG
+         STA TIM
+         LDA #167
+         STA KORX
+          POKE  KORY,191
+         ;           JSR WLEWO
+         ;           LDX #$20
+         ;           TXS
+         LDA #0
+         STA HSC
+         STA VSC
+         STA RTFLG
+         STA SMALLH
+         STA SMALLV
+         STA H.MOV
+         STA HKRECFLG
+         JSR WPRAWO
+          POKE  LAD+1,0
+          DPOKE  EZWSK,EZPCZ
+SHPT     JSR WSTAWTLOH
+         ;           VINC  EZWSK
+          ICL  LP1+1
+         AND #$03
+         STA LP1+1
+         BNE NOIN
+         INC LP2+1
+NOIN
+          ICL  LAD+1
+         CMP #42
+         BCC SHPT
+; SET  8,2  set moze tez byc tu,
+;(przed skokoiem do glownej petli)
+;podobnie wsp. spritow.
+         ;           LDA #1
+         ;           STA ONOFF+2
+         ;           STA SPENABLE+2
+;
+          DPOKE  EZWSK,EZPCZ
+          POKE  XEZ,0
+         LDA #$C0
+         STA NMIEN
+         JMP SOFTSP
+;MAKETBL
+         ;           LDX #$7F
+;PPT0 TXA
+         ;           STA EP,X
+         ;           DEX
+         ;           BPL PPT0
+         ;           RTS
+SYSV
+         LDA $0218
+         BEQ JX
+         DEC $0218
+         BNE JX
+         JSR SV
+JX       JMP JXITVBV
+SV       JMP ($0226)
+EXITVBV
+         ;           LDA #0
+         ;           STA $D01A
+         PLA 
+         TAY 
+         PLA 
+         TAX 
+         PLA 
+         RTI 
+DLI
+         STA PHA
+         STX PHX
+         LDX LDLI
+         INC LDLI
+EPC      LDA # >E
+         CLC 
+         ADC FONTTB,X
+         STA $D409
+         LDX PHX
+         LDA PHA
+         RTI 
+;   EP  *=  *+$80
+XADCTBL
+         .BYTE  <0, <8, <2*8, <3*8, <4*8, <5*8, <6*8, <7*8
+         .BYTE  <8*8, <9*8, <10*8, <11*8, <12*8, <13*8, <14*8, <15*8, <16*8
+         .BYTE  <17*8, <18*8, <19*8, <20*8, <21*8, <22*8, <23*8
+         .BYTE  <24*8, <25*8, <26*8, <27*8, <28*8, <29*8, <30*8, <31*8, <32*8
+         .BYTE  <33*8, <34*8, <35*8, <36*8, <37*8, <38*8, <39*8, <40*8, <41*8
+         .BYTE  <0, <8, <2*8, <3*8, <4*8, <5*8, <6*8, <7*8
+         .BYTE  <8*8, <9*8, <10*8, <11*8, <12*8, <13*8, <14*8, <15*8, <16*8
+         .BYTE  <17*8, <18*8, <19*8, <20*8, <21*8, <22*8, <23*8
+         .BYTE  <24*8, <25*8, <26*8, <27*8, <28*8, <29*8, <30*8, <31*8, <32*8
+         .BYTE  <33*8, <34*8, <35*8, <36*8, <37*8, <38*8, <39*8, <40*8, <41*8
+XADCTBH
+         .BYTE  >0, >8, >2*8, >3*8, >4*8, >5*8, >6*8, >7*8
+         .BYTE  >8*8, >9*8, >10*8, >11*8, >12*8, >13*8, >14*8, >15*8, >16*8
+         .BYTE  >17*8, >18*8, >19*8, >20*8, >21*8, >22*8, >23*8
+         .BYTE  >24*8, >25*8, >26*8, >27*8, >28*8, >29*8, >30*8, >31*8, >32*8
+         .BYTE  >33*8, >34*8, >35*8, >36*8, >37*8, >38*8, >39*8, >40*8, >41*8
+         .BYTE  >0, >8, >2*8, >3*8, >4*8, >5*8, >6*8, >7*8
+         .BYTE  >8*8, >9*8, >10*8, >11*8, >12*8, >13*8, >14*8, >15*8, >16*8
+         .BYTE  >17*8, >18*8, >19*8, >20*8, >21*8, >22*8, >23*8
+         .BYTE  >24*8, >25*8, >26*8, >27*8, >28*8, >29*8, >30*8, >31*8, >32*8
+         .BYTE  >33*8, >34*8, >35*8, >36*8, >37*8, >38*8, >39*8, >40*8, >41*8
+EP       *=  *+$80
+EQ0      =   EP0+1   ;   EP0-3
+EQ1      =   EP1+1   ;  EP1-3
+EQ2      =   EP2+1   ; EP2-3
+DL
+         .BYTE $70,$70,$F0
+         .BYTE $F0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$F4, <EQ1, >EQ1,$F4, <EQ2, >EQ2
+         .BYTE $F4, <EQ0, >EQ0,$54, <EQ1, >EQ1,$52, <DUP+1+1, >DUP+1+1 ;$54, <EQ2, >EQ2
+         .BYTE $41, <DL, >DL
+ENDDL
+FONTTB   *=  *+24
+SETTRANS
+         LDA #0
+         STA $D400
+         LDX #7
+STD01    STA $D000,X
+         STA $D200,X
+         DEX 
+         BPL STD01
+         TAX 
+ST20     STA $0200,X
+         STA $0300,X
+         DEX 
+         BNE ST20
+         LDA # <SYSV ;BV
+         STA $0222
+         LDA # >SYSV ;BV
+         STA $0223
+         INX 
+         STX $0301
+         LDA #$80
+         STA $0308
+         STA $11
+         INC $D301
+         LDX #$17
+VPT      LDA $C44B,X ;  V202TB,X
+         STA $0200,X ;$0202,X
+         DEX 
+         BPL VPT
+         DEC $D301
+         LDA #3
+         STA $0232
+         LDA #$10
+         STA $0306
+         RTS 
+;V202TB
+         ;           .BYTE $CD,$C0,$CD,$C0,$CD,$C0
+         ;           .BYTE $1F,$06,$2C,$EB,$AD,$EA,$EC,$EA
+         ;           .BYTE $CD,$C0,$CD,$C0,$CD,$C0,$30,$C0
+SOFTSP
+         LDY #0
+PTL2
+         LDA SPENABLE,Y
+         BEQ OC0
+         LDA ONOFF,Y
+         BEQ STY
+         LDA #0
+         STA ONOFF,Y
+         BEQ JI
+OC0      LDA ONOFF,Y
+         BEQ JI
+         LDA #0
+         STA ONOFF,Y
+         BEQ STY
+JI
+         STY IL
+         JMP DAL0.1
+STY      STY IL
+         LDA XP40,Y
+         STA X4
+         LDA OLDXL,Y
+         STA XLP
+         LDA OLDYL,Y
+         STA YLP
+         LDA POCZY,Y
+         STA POCZYP
+         LDA YADC,Y
+         STA YADCP
+         ;           TYA
+         ;           ASL A
+         ;           TAY
+         LDA STAREL,Y
+         STA LDA3.5+1
+         LDA STAREH,Y
+         STA LDA3.5+2
+         LDX #0
+         LDA XLP
+         STA IX
+LDA2     LDY X4
+         LDA XADCTBL,Y
+         STA XADC2
+         LDA XADCTBH,Y
+         STA XADC2+1
+         LDY YADCP
+         STY YADC2
+         LDA YLP
+         STA IY
+         LDY POCZYP
+LDA3
+         STX XSCH
+         LDX YADC2
+         CLC 
+TB       LDA TABL,X
+         ADC XADC2
+         STA AD2
+TB1      LDA TABH,X
+         ADC XADC2+1
+         STA AD2+1
+         LDX XSCH
+LDA3.5   LDA STARY0,X
+         STA (AD2),Y
+         INX 
+         DEC IY
+         BEQ KON0
+         INY 
+         CPY #8
+         BCC LDA3.5
+         LDY #0
+         ;           INC YADC2
+         INC YADC2
+         JMP LDA3
+KON0
+DEC      DEC IX
+         BEQ DAL0.1
+         INC X4
+         ;           INC X4
+         JMP LDA2
+DAL0.1
+         LDY IL
+         LDA XL,Y
+         STA OLDXL,Y
+         LDA YL,Y
+         STA OLDYL,Y
+         LDY IL
+         INY 
+         CPY #ILESP
+         BCS DAL0
+         JMP PTL2
+DAL0
+         ;           LDA TIM2
+         ;           BNE NOTLO
+         ;           LDA $D300
+         ;           EOR #$FF
+         ;           AND #$0F
+         ;           STA JOY0
+;--SOFT SCROLLING  HORYZONTALNY--
+         LDA XMAN
+         CMP #$68
+         BCS CH.P
+         CMP #$58-1
+         BCC N.SH
+         DEC H.MOV
+         INC XMAN
+         JMP N.SH
+CH.P
+         CMP #$88
+         BCC N.SH
+         CMP #$98+1
+         BCS N.SH
+         INC H.MOV
+         DEC XMAN
+N.SH
+;Soft scrolling vertycalny
+         LDA YMAN
+         CMP #$70
+         BCS CH.D
+         CMP #$50-1
+         BCC N.SV
+         DEC V.MOV
+         INC YMAN
+         JMP N.SV
+CH.D
+         CMP #$90
+         BCC N.SV
+         CMP #$A0+1
+         BCS N.SV
+         INC V.MOV
+         DEC YMAN
+N.SV
+         LDA VKRECFLG
+         BEQ NOTLO
+WSTV     JSR WSTAWTLOV
+NOTLO
+          POKE  HKRECFLG,0
+          POKE  VKRECFLG,0
+         JSR JOYCTL
+          POKE  H.MOV,0
+          POKE  V.MOV,0
+         ;           JSR WPRAWO
+         ;           JSR WGORE
+         LDA HKRECFLG
+         BEQ NOTLOH
+         ;           LDA HSC
+;CMH CMP #0
+         ;           BNE NOTLOH
+         ;           JSR WLEWO
+WSTH     JSR WSTAWTLOH
+NOTLOH
+         ;           LDA VSC
+         ;           CMV CMP #0
+         ;           LDA VKRECFLG
+         ;           BEQ NOTLO
+         ;           BNE NOTLO
+         ;           JSR WGORE
+;WSTV JSR WSTAWTLOV
+;NOTLO
+         ;           TU ZMIENIAC KSZTALT
+JSCV     JSR SCROLDOWN
+         LDA VKRECFLG
+         BEQ QQ
+JEZSCR   JSR EZSCRDOWN
+QQ
+         JSR ANIMOTION
+KOR      JSR RIGHKOR
+KORV     JSR DOWNKOR
+         LDY #ILESP
+         DEY 
+PTL1
+         LDA SPENABLE,Y
+         BNE STY1
+         JMP IN1
+STY1     STY IL
+         ;           TYA
+         ;           ASL A
+         ;           TAX
+         LDA WNADRSL,Y
+         STA WNL+1
+         STA WNH+1
+         LDA WNADRSH,Y
+         STA WNL+2
+         STA WNH+2
+         LDA Y,Y
+         CLC 
+         ADC KORY
+         TAX 
+         ROR A
+         LSR A
+         LSR A       AND #$FE
+         STA YADC,Y
+         STA YADCP
+         LDA X,Y
+         CLC 
+         ADC KORX
+         STA X2      ;9TY BIT W C
+         ROR A
+         LSR A       AND #$FE
+         STA XP40,Y
+         STA X3      ;  TAX
+         ;           STX X3
+         TXA 
+         ;           LDA Y,Y
+         AND #$07
+         STA POCZY,Y
+         STA POCZYP
+         LDA X2
+         AND #$03
+         ASL A
+         TAX 
+WNL      LDA WNN+0,X
+         STA WZSP+1
+         INX 
+WNH      LDA WNN+0,X
+         STA WZSP+2
+         ;           TXA
+         ;           LSR A
+         ;           TAX
+;
+;
+;
+;
+;
+NALOZ
+PTL0
+         LDA XL,Y
+         STA XLP
+         LDA YL,Y
+         STA YLP
+         ;           TYA
+         ;           ASL A
+         ;           TAY
+         LDA STAREL,Y
+         STA STR+1
+         LDA STAREH,Y
+         STA STR+2
+         LDX #0
+         LDA XLP
+         STA IX
+LDA1
+         LDY X3
+         LDA XADCTBL,Y
+         STA XADC2
+         LDA XADCTBH,Y
+         STA XADC2+1
+         LDY YADCP
+         STY YADC2
+         LDA YLP
+         STA IY
+         LDY POCZYP
+LDA0
+         STX XSCH
+         LDX YADC2
+         CLC 
+TB2      LDA TABL,X
+         ADC XADC2
+         STA AD2
+TB3      LDA TABH,X
+         ADC XADC2+1
+         STA AD2+1
+         LDX XSCH
+LDA0.5   LDA (AD2),Y
+STR      STA STARY0,X
+         STY ADW2
+WZSP     LDY $FFFF,X
+;---NAKLADANIE---
+         STY ADW
+         LDA MASKA,Y
+         LDY ADW2
+         AND (AD2),Y
+         ORA ADW
+         STA (AD2),Y
+;----------------
+         INX 
+         DEC IY
+         BEQ KON2
+         INY 
+         CPY #$08
+         BCC LDA0.5
+         LDY #0
+         ;           INC YADC2
+         INC YADC2
+         JMP LDA0
+KON2
+DEC1     DEC IX
+         BEQ KON3
+         ;           INC X3
+         INC X3
+         JMP LDA1
+KON3
+         LDY IL
+IN1      DEY 
+         BMI RTS2
+         JMP PTL1
+RTS2
+         DEC CHANFLG
+         BMI PIERWSZY
+         LDA # <TAB2L
+         STA TB+1
+         STA TB2+1
+         LDA # <TAB2H
+         STA TB1+1
+         STA TB3+1
+         LDA # >TAB2L
+         STA TB+2
+         STA TB2+2
+         LDA # >TAB2H
+         STA TB1+2
+         STA TB3+2
+         LDA # >E
+         STA EPCS
+         JMP KON4
+PIERWSZY
+         LDA # <TABL
+         STA TB+1
+         STA TB2+1
+         LDA # <TABH
+         STA TB1+1
+         STA TB3+1
+         LDA # >TABL
+         STA TB+2
+         STA TB2+2
+         LDA # >TABH
+         STA TB1+2
+         STA TB3+2
+         LDA # >EK2
+         STA EPCS
+         LDA #1
+         STA CHANFLG
+KON4
+; LDA RTFLG
+; BNE LD2
+         DEC TIM
+         LDA TIM
+         AND #1
+         STA TIM2
+         ;           BNE JSC
+;KOR JSR RIGHKOR
+;KORV JSR DOWNKOR
+         ;           JMP LD2
+;JSC JSR SCROLRIGHT
+;JSCV JSR SCROLDOWN
+LD2
+          MOVE.B  HSC,HSCROLS
+          MOVE.B  VSC,VSCROLS
+         LDA ZEGAR
+LDZ      CMP ZEGAR
+         BEQ LDZ
+         LDA EPCS
+         STA EPC+1
+         ;           LDA HSC
+         ;           STA HSCROLS
+; LDA RTFLG
+; BNE JCL
+         ;           LDA TIM2
+         ;           BEQ JCL
+JKC      JSR KRECRIGHT
+JKCV     JSR KRECDOWN
+         LDA VKRECFLG
+         BEQ JCL
+;JEZSCR JSR EZSCRDOWN
+JCL      ;           JSR COLORS
+         LDY #ILESP
+         DEY 
+PRZEP
+         LDX POCZY,Y
+         LDA OLDPOCZY,Y
+         STA POCZY,Y
+         TXA 
+         STA OLDPOCZY,Y
+         LDX YADC,Y
+         LDA OLDYADC,Y
+         STA YADC,Y
+         TXA 
+         STA OLDYADC,Y
+         LDX XP40,Y
+         LDA XP41,Y
+         STA XP40,Y
+         TXA 
+         STA XP41,Y
+         LDX STAREL,Y
+         LDA STARSL,Y
+         STA STAREL,Y
+         TXA 
+         STA STARSL,Y
+         LDX STAREH,Y
+         LDA STARSH,Y
+         STA STAREH,Y
+         TXA 
+         STA STARSH,Y
+         DEY 
+         BPL PRZEP
+ENDE
+LAWP
+         LDA WAITP
+         BNE WTP0
+LFR      LDA FRAME
+         CMP #4
+         BCC LFR
+         LDA #0
+         STA FRAME
+WTP0
+         LDA $D01F
+         AND #1
+         BNE L01F
+         JMP GAMEOVER
+L01F
+         JMP SOFTSP
+;RTFLG .BYTE 0
+ECLR
+         LDA # >E
+         STA EF0+2
+         LDA # >EK2
+         STA EF1+2
+         LDA #0
+         LDX #$20
+         TAY 
+EF0      STA E,Y
+EF1      STA EK2,Y
+         INY 
+         BNE EF0
+         INC EF0+2
+         INC EF1+2
+         DEX 
+         BNE EF0
+         RTS 
+SCROLLEFT
+         ;           DEC HSC
+         SEC 
+         LDA HSC
+HSB      SBC #$00
+         STA HSC
+         BPL HDALEJ
+         AND #$03    ;LDA #3
+         STA HSC
+         INC HKRECFLG
+HDALEJ
+         RTS 
+LEFTKOR
+         ;           INC KORX
+         CLC 
+         LDA KORX
+         ADC HSB+1
+         CMP #168
+         BCC HRT4
+         SBC #168    ; LDA #0
+HRT4
+         STA KORX
+RTS4     RTS 
+KRECLEFT
+         ;           LDA HSC
+         ;           CMP #3
+         ;           BCC RTS3
+         LDA HKRECFLG
+          LBEQ  RTS3
+         LDA EP
+         STA TSCH
+         LDA EP+42
+         STA TSCH+1
+         LDA EP+84
+         STA TSCH+2
+         LDX #0
+LAA
+         LDA EP+1,X
+         STA EP,X
+         LDA EP+43,X
+         STA EP+42,X
+         LDA EP+85,X
+         STA EP+84,X
+         INX 
+         CPX #41
+         BCC LAA
+         LDA TSCH
+         STA EP+41
+         LDA TSCH+1
+         STA EP+83
+         LDA TSCH+2
+         STA EP+125
+          ICL  SMALLH
+         AND #$03
+         STA SMALLH
+         BNE NIA
+         INC AXT
+NIA       VINC  EZWSK
+         LDA EZWSK
+         CMP # <EZKON
+         LDA EZWSK+1
+         SBC # >EZKON
+         BCC N.OV0
+          DPOKE  EZWSK,EZPCZ
+N.OV0
+         ;           JMP WSTAWTLO
+RTS3     RTS 
+SCROLRIGHT
+         ;           INC HSC
+         CLC 
+         LDA HSC
+HAD      ADC #$00
+         STA HSC
+         ;           LDA HSC
+         CMP #4
+         BCC HDALEJ2
+         AND #$03    ;  LDA #0
+         STA HSC
+         INC HKRECFLG
+HDALEJ2
+         RTS 
+RIGHKOR
+         ;           DEC KORX
+         LDA KORX
+         SEC 
+         SBC HAD+1
+         CMP #250
+         BCC HRT5
+         ADC #167    ;  LDA #167
+HRT5
+         STA KORX
+RTS5     RTS 
+KRECRIGHT
+         ;           LDA HSC
+         ;           BNE RTS6
+         LDA HKRECFLG
+          LBEQ  RTS6
+         LDA EP+41
+         STA TSCH
+         LDA EP+83
+         STA TSCH+1
+         LDA EP+125
+         STA TSCH+2
+         LDX #40
+LAA2
+         LDA EP,X
+         STA EP+1,X
+         LDA EP+42,X
+         STA EP+43,X
+         LDA EP+84,X
+         STA EP+85,X
+         DEX 
+         BPL LAA2
+         LDA TSCH
+         STA EP
+         LDA TSCH+1
+         STA EP+42
+         LDA TSCH+2
+         STA EP+84
+          DCL  SMALLH
+         AND #$03
+         STA SMALLH
+         CMP #3
+         BNE NDA
+         DEC AXT
+NDA
+          VDEC  EZWSK
+         LDA EZWSK
+         CMP # <EZPCZ
+         LDA EZWSK+1
+         SBC # >EZPCZ
+         BCS N.OV1
+          DPOKE  EZWSK,EZKON-1
+N.OV1
+         ;           JMP WSTAWTLO
+RTS6     RTS 
+SCROLUP
+         CLC 
+         LDA VSC
+VAD      ADC #$00
+         STA VSC
+         CMP #8
+         BCC VDALEJ2
+         AND #$07
+         STA VSC
+         INC VKRECFLG
+;  ADD.Q  EZWSK,42
+; LDA EZWSK
+; CMP # <EZKON
+; LDA EZWSK+1
+; SBC # >EZKON
+; BCC VDALEJ2
+; LDA EZWSK
+; SBC # <42*24
+; STA EZWSK
+; LDA EZWSK+1
+; SBC # >42*24
+; STA EZWSK+1
+         ;           JMP WSTAWTLO
+VDALEJ2
+         RTS 
+UPKOR
+         CLC 
+         LDA KORY
+         ADC VAD+1
+         STA KORY
+         LDA KORY
+         CMP #192
+         BCC VRT0
+         SBC #192
+         STA KORY
+VRT0     RTS 
+KRECUP
+         LDA VKRECFLG
+         BEQ NAA
+         LDX #41
+UP0      LDA EP,X
+         STA TSCH,X
+         DEX 
+         BPL UP0
+         LDX #41
+UP3
+         LDA EP+42,X
+         STA EP,X
+         LDA EP+84,X
+         STA EP+42,X
+         DEX 
+         BPL UP3
+         LDX #41
+UP1      LDA TSCH,X
+         STA EP+84,X
+         DEX 
+         BPL UP1
+         LDY FONTTB+0
+         LDX #0
+UP2      LDA FONTTB+1,X
+         STA FONTTB,X
+         INX 
+         CPX #23
+         BCC UP2
+         STY FONTTB+23
+         CLC 
+         LDA SMALLV
+         ADC #$04
+         AND #$0F
+         STA SMALLV
+         BNE NAA
+         INC YTB
+          ADD.W  AYT,TBSZER,AYT
+NAA
+         RTS 
+EZSCRUP
+          ADD.Q  EZWSK,42
+         LDA EZWSK
+         CMP # <EZKON
+         LDA EZWSK+1
+         SBC # >EZKON
+         BCC VRT1
+         LDA EZWSK
+         SBC # <42*24
+         STA EZWSK
+         LDA EZWSK+1
+         SBC # >42*24
+         STA EZWSK+1
+         ;           JMP WSTAWTLO
+VRT1     RTS 
+SCROLDOWN
+; DEC VSC
+         SEC 
+         LDA VSC
+VSB      SBC #$00
+         STA VSC
+         BPL VDALEJ
+         AND #$07    ;LDA #7
+         STA VSC
+         INC VKRECFLG
+; LDA EZWSK
+; SBC #42
+; STA EZWSK
+; BCS NDE1
+; DEC EZWSK+1
+;NDE1
+; LDA EZWSK
+; CMP # <EZPCZ
+; LDA EZWSK+1
+; SBC # >EZPCZ
+; BCS VDALEJ
+;  ADD.Q  EZWSK,42*24
+VDALEJ
+         RTS 
+DOWNKOR
+; DEC KORY
+         SEC 
+         LDA KORY
+         SBC VSB+1
+         CMP #240
+         BCC VRS2
+         ADC #191
+VRS2
+         STA KORY
+VRT2     RTS 
+KRECDOWN
+         LDA VKRECFLG
+         BEQ NSA
+         LDX #41
+UP4      LDA EP+84,X
+         STA TSCH,X
+         DEX 
+         BPL UP4
+         LDX #41
+UP7
+         LDA EP+42,X
+         STA EP+84,X
+         LDA EP,X
+         STA EP+42,X
+         DEX 
+         BPL UP7
+         LDX #41
+UP5      LDA TSCH,X
+         STA EP,X
+         DEX 
+         BPL UP5
+         LDY FONTTB+23
+         LDX #22
+UP6      LDA FONTTB,X
+         STA FONTTB+1,X
+         DEX 
+         BPL UP6
+         STY FONTTB+0
+         SEC 
+         LDA SMALLV
+         SBC #$04
+         STA SMALLV
+         BPL NSA
+         AND #$0F
+         STA SMALLV
+         DEC YTB
+          SBB.W  AYT,TBSZER,AYT
+NSA
+         RTS 
+         ;           JMP WSTAWTLO
+EZSCRDOWN
+         SEC 
+         LDA EZWSK
+         SBC #42
+         STA EZWSK
+         BCS NDE1
+         DEC EZWSK+1
+NDE1
+         LDA EZWSK
+         CMP # <EZPCZ
+         LDA EZWSK+1
+         SBC # >EZPCZ
+         BCS VRT3
+          ADD.Q  EZWSK,42*24
+VRT3     RTS 
+;TSCH .BYTE 0,0,0
+;HSC .BYTE 0
+HKRECFLG .BYTE 0
+VKRECFLG .BYTE 0
+;----------
+WSTAWTLOH
+;----------
+         CLC 
+         LDA EZWSK
+         ADC LAD+1
+         STA EZPTH+1
+         LDA EZWSK+1
+         ADC #$00
+         STA EZPTH+2
+         LDA SMALLH
+         CLC 
+LP1      ADC #$00
+         AND #$03
+         ORA SMALLV
+         STA SMALL2
+          POKE  LLINE+1,0
+         CLC 
+         LDA # <TABADRKW
+         ADC AYT
+         STA ADT+1
+         LDA # >TABADRKW
+         ADC AYT+1
+         STA ADT+2
+         LDA AXT
+         CLC 
+LP2      ADC #$00
+         STA XKW+1
+LAD      LDX #$00
+XKW      LDY #$FF
+ADT      LDA $FFFF,Y ;NR.KW ODWR. NAJP.
+         STA KWAD+2  ;< NIB. POTEM >
+         AND #$F0
+         STA KWAD+1
+         LDA KWAD+2
+         AND #$0F
+         CLC 
+         ADC # >KWADRATY
+         STA KWAD+2
+SM2      LDY SMALL2
+         LDA EZPTH+1
+         CMP # <EZKON
+         LDA EZPTH+2
+         SBC # >EZKON
+         BCC NP.ECH
+         LDA EZPTH+1
+         SBC # <42*24
+         STA EZPTH+1
+         LDA EZPTH+2
+         SBC # >42*24
+         STA EZPTH+2
+NP.ECH
+KWAD     LDA $FFFF,Y
+         STA ADR
+EZPTH    STA $FACE
+          ADD.Q  EZPTH+1,42
+         LDA #0
+         ASL ADR
+         ROL A
+         ASL ADR
+         ROL A
+         ASL ADR
+         ROL A
+         CLC 
+         ADC # >FONTGEN
+         STA ADR+1
+         LDA EP,X
+         STA AD2
+         LDA #0
+         ASL AD2
+         ROL A
+         ASL AD2
+         ROL A
+         ASL AD2
+         ROL A
+LLINE    LDY #$FF
+         CLC 
+         ADC FONTTB,Y
+         ADC # >E
+         STA AD2+1
+         ADC # >[EK2-E]
+         STA G2+2
+          MOVE.B  AD2,G2+1
+         LDY #7
+FM0      LDA (ADR),Y
+         STA (AD2),Y
+G2       STA $FFFF,Y
+         DEY 
+         BPL FM0
+         INC LLINE+1
+         LDA LLINE+1
+         CMP #24
+         BCS ENDH
+         TXA 
+         CLC 
+         ADC #42
+         CMP #126
+         BCC FM1
+         SBC #126
+FM1      TAX 
+         CLC 
+         LDA SMALL2
+         ADC #4
+         STA SMALL2
+         CMP #16
+          LBCC  SM2
+         AND #$0F
+         STA SMALL2
+          ADD.W  ADT+1,TBSZER,ADT+1
+         JMP XKW
+ENDH
+         RTS 
+;---------
+WSTAWTLOV
+;---------
+         CLC 
+         LDA EZWSK
+ADL      ADC #$00
+         STA EZPTV+1
+         LDA EZWSK+1
+ADH      ADC #$00
+         STA EZPTV+2
+         LDA EZPTV+1
+         CMP # <EZKON
+         LDA EZPTV+2
+         SBC # >EZKON
+         BCC N.OV2
+         LDA EZPTV+1
+         SBC # <42*24
+         STA EZPTV+1
+         LDA EZPTV+2
+         SBC # >42*24
+         STA EZPTV+2
+N.OV2
+         LDA SMALLV
+         SEC 
+GD1      SBC #0
+         AND #$0F
+         ORA SMALLH
+         STA SMALL2
+          POKE  KWCOL+1,0
+         CLC 
+         LDA # <TABADRKW
+         ADC AYT
+         STA ADR
+         LDA # >TABADRKW
+         ADC AYT+1
+         STA ADR+1
+GD2      LDX #$00
+         CLC 
+         LDA ADR
+         ADC ILENIZL,X
+         STA ADR
+         LDA ADR+1
+         ADC ILENIZH,X
+         STA ADR+1
+          POKE  LICZ,42
+          ADD.W  ADR,AXT,AT2+1
+LADV     LDX #0
+KWCOL    LDY #0
+AT2      LDA $FFFF,Y ;NR.KW. ODWROTNIE
+         STA KWA2+2
+         AND #$F0
+         STA KWA2+1
+         LDA KWA2+2
+         AND #$0F
+         CLC 
+         ADC # >KWADRATY
+         STA KWA2+2
+SMV      LDY SMALL2
+KWA2     LDA $FFFF,Y
+         STA ADR
+EZPTV    STA $FACE
+          VINC  EZPTV+1
+         LDA EZPTV+1
+         CMP # <EZKON
+         LDA EZPTV+2
+         SBC # >EZKON
+         BCC NP.EC
+          DPOKE  EZPTV+1,EZPCZ
+NP.EC
+         LDA #0
+         ASL ADR
+         ROL A
+         ASL ADR
+         ROL A
+         ASL ADR
+         ROL A
+         CLC 
+         ADC # >FONTGEN
+         STA ADR+1
+         LDA EP,X
+         STA AD2
+         LDA #0
+         ASL AD2
+         ROL A
+         ASL AD2
+         ROL A
+         ASL AD2
+         ROL A
+GD3      ADC FONTTB+0
+         ADC # >E
+         STA AD2+1
+         ADC # >[EK2-E]
+         STA G22+2
+          MOVE.B  AD2,G22+1
+         LDY #7
+FM2      LDA (ADR),Y
+         STA (AD2),Y
+G22      STA $FFFF,Y
+         DEY 
+         BPL FM2
+         DEC LICZ
+         BEQ ENDV
+         INX 
+         INC SMALL2
+         LDA SMALL2
+         AND #$03
+         BNE SMV
+         SEC 
+         LDA SMALL2
+         SBC #$04
+         STA SMALL2
+         INC KWCOL+1
+         JMP KWCOL
+ENDV
+         RTS 
+TBSZER   .WORD $A3
+TBWYS    .BYTE $32
+AYT      .WORD $00   ;    $26*$A3
+AXT      .WORD $50
+YTB      .BYTE $00
+EZWSK    .WORD 0
+XEZ      .BYTE 0
+EZPCZ    *=  *+42*24
+EZKON
+YEZTBL   .BYTE  <0, <42, <42*2, <42*3, <42*4, <42*5, <42*6, <42*7, <42*8, <42*9, <42*10, <42*11
+         .BYTE  <42*12, <42*13, <42*14, <42*15, <42*16, <42*17, <42*18, <42*19, <42*20, <42*21, <42*22, <42*23
+YEZTBH   .BYTE  >0, >42, >42*2, >42*3, >42*4, >42*5, >42*6, >42*7, >42*8, >42*9, >42*10, >42*11
+         .BYTE  >42*12, >42*13, >42*14, >42*15, >42*16, >42*17, >42*18, >42*19, >42*20, >42*21, >42*22, >42*23
+MASKA
+         .BYTE $FF,$FC,$FC,$FC,$F3,$F0,$F0,$F0
+         .BYTE $F3,$F0,$F0,$F0,$F3,$F0,$F0,$F0
+         .BYTE $CF,$CC,$CC,$CC,$C3,$C0,$C0,$C0
+         .BYTE $C3,$C0,$C0,$C0,$C3,$C0,$C0,$C0
+         .BYTE $CF,$CC,$CC,$CC,$C3,$C0,$C0,$C0
+         .BYTE $C3,$C0,$C0,$C0,$C3,$C0,$C0,$C0
+         .BYTE $CF,$CC,$CC,$CC,$C3,$C0,$C0,$C0
+         .BYTE $C3,$C0,$C0,$C0,$C3,$C0,$C0,$C0
+         .BYTE $3F,$3C,$3C,$3C,$33,$30,$30,$30
+         .BYTE $33,$30,$30,$30,$33,$30,$30,$30
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $3F,$3C,$3C,$3C,$33,$30,$30,$30
+         .BYTE $33,$30,$30,$30,$33,$30,$30,$30
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $3F,$3C,$3C,$3C,$33,$30,$30,$30
+         .BYTE $33,$30,$30,$30,$33,$30,$30,$30
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+         .BYTE $0F,$0C,$0C,$0C,$03,$00,$00,$00
+         .BYTE $03,$00,$00,$00,$03,$00,$00,$00
+WPRAWO
+         LDA #0
+         STA LP1+1
+         STA LP2+1
+         STA LAD+1
+;  POKE  CMH+1,3
+          DPOKE  WSTH+1,WSTAWTLOH
+;  DPOKE  JSC+1,SCROLRIGHT
+          DPOKE  JKC+1,KRECRIGHT
+          DPOKE  KOR+1,RIGHKOR
+         RTS 
+WLEWO
+          POKE  LAD+1,41
+         LDA #1
+         STA LP1+1
+         LDX #10
+         LDA SMALLH
+         CMP #3
+         BCC NIX
+         INX 
+NIX      STX LP2+1
+          DPOKE  WSTH+1,WSTAWTLOH
+;  DPOKE  JSC+1,SCROLLEFT
+          DPOKE  JKC+1,KRECLEFT
+          DPOKE  KOR+1,LEFTKOR
+;  POKE  CMH+1,0
+         RTS 
+SETPRW
+         LDA #0
+         STA $D40E
+         STA $D20E
+         LDA #$FE
+         STA $D301
+         LDA # <PRZ
+         STA $FFFA
+         LDA # >PRZ
+         STA $FFFB
+         RTS 
+WDOL
+         LDA #0
+         STA GD1+1
+         STA GD2+1
+         STA LADV+1
+         STA ADH+1
+         STA ADL+1
+;  POKE  CMV+1,7
+          DPOKE  WSTV+1,WSTAWTLOV
+          DPOKE  GD3+1,FONTTB+0
+          DPOKE  JSCV+1,SCROLDOWN
+          DPOKE  JKCV+1,KRECDOWN
+          DPOKE  KORV+1,DOWNKOR
+          DPOKE  JEZSCR+1,EZSCRDOWN
+         RTS 
+WGORE
+          POKE  ADL+1, <42*23
+          POKE  ADH+1, >42*23
+          POKE  LADV+1,84
+         LDA #4
+         STA GD1+1
+         LDX #2
+         LDA SMALLV
+         CMP #12
+         BNE NIXV
+         DEX 
+NIXV     STX GD2+1
+          DPOKE  WSTV+1,WSTAWTLOV
+          DPOKE  GD3+1,FONTTB+23
+          DPOKE  JSCV+1,SCROLUP
+          DPOKE  JKCV+1,KRECUP
+          DPOKE  KORV+1,UPKOR
+          DPOKE  JEZSCR+1,EZSCRUP
+;  POKE  CMV+1,0
+         RTS 
+ILENIZL  .BYTE 0,0,0
+ILENIZH  .BYTE 0,0,0
+VSTOP
+          DPOKE  WSTV+1,RTS3
+          DPOKE  JSCV+1,RTS3
+          DPOKE  JKCV+1,RTS3
+          DPOKE  KORV+1,RTS3
+          DPOKE  JEZSCR+1,RTS3
+         RTS 
+HSTOP
+          DPOKE  WSTH+1,RTS3
+;  DPOKE  JSC+1,RTS3
+          DPOKE  JKC+1,RTS3
+          DPOKE  KOR+1,RTS3
+         RTS 
+

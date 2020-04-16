@@ -1,0 +1,20 @@
+         .OPT NO LIST
+         .INCLUDE #D8:SHORT.SYS
+         .INCLUDE #D8:LABELS.MAC
+         *=  $4400
+         .INCLUDE #D8:MAKESP.MAC
+         .INCLUDE #D8:WDAT.MAC
+WZORY0
+         .INCLUDE #D8:WZORY.MAC
+WZORY0END
+WZORY1.3 *=  *+[WZORY0END-WZORY0]*3
+         .INCLUDE #D8:STARES.MAC
+RUN
+
+         .INCLUDE #D8:W3.MAC
+         .INCLUDE #D8:AH.MAC
+         .INCLUDE #D8:AS.MAC
+A0       .OPT LIST
+         *=  $02E0
+         .WORD RUN
+
